@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>Audio Sphere</title>
+    <style>
+        body {
+            background-color: #000000;
+            margin: 0;
+            overflow: hidden;
+            cursor: pointer;
+            font-family: "Courier New", Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+
+<script src="assets/js/datgui.min.js"></script>
+<script src="assets/js/three.min.js"></script>
+
+<script>
+    const Exp = function() {
+
+        this.SCREEN_WIDTH = window.innerWidth;
+        this.SCREEN_HEIGHT = window.innerHeight;
+
+        this.mouseX = 0;
+        this.mouseY = 0;
+
+        this.windowHalfX = window.innerWidth / 2;
+        this.windowHalfY = window.innerHeight / 2;
+
+        this.audioSource = null;
+        this.audioAnalyser = null;
+        this.bufferLength = null;
+        this.audioContext = null;
+        this.dataArray = null;
+
+
+        this.camera = null;
+        this.scene = null;
+        this.renderer = null;
+        this.composer = null;
+
+
+        this.init = function() {
+
+            //this.initAudio();
+
+            let container;
+
+            container = document.createElement('div');
+
+            document.body.appendChild(container);
+
+            this.camera = new THREE.PerspectiveCamera(75, this.SCREEN_WIDTH / this.SCREEN_HEIGHT, 1, 10000);
+            this.camera.position.z = 2000;
+
+            this.scene = new THREE.Scene();
+
+            this.renderer = new THREE.WebGLRenderer();
+            this.renderer.setPixelRatio(window.devicePixelRatio);
+            this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+            this.renderer.setClearColor( 0xffffff, 0);
+            container.appendChild(this.renderer.domElement);
+
+            this.addListeners();
+
+            this.update();
+
+        };
+
+        this.initAudio = function(){
+
+            this.audioContext = new webkitAudioContext();
+
+            this.audioAnalyser = this.audioContext.createAnalyser();
+
+            this.audioAnalyser.fftSize = 4096;
+            this.bufferLength = this.audioAnalyser.frequencyBinCount;
+            this.dataArray = new Uint8Array(this.bufferLength);
+            this.audioAnalyser.getByteTimeDomainData(this.dataArray);
+
+            this.audioSource = this.audioContext.createMediaElementSource(this.audio);
+            this.audioSource.connect(this.audioAnalyser);
+            this.audioAnalyser.connect(this.audioContext.destination);
+
+        };
+
+        this.addListeners = function(){
+
+            window.addEventListener('resize', this.onWindowResize.bind(this), false);
+
+        };
+
+        this.onWindowResize = function() {
+
+            this.windowHalfX = window.innerWidth / 2;
+            this.windowHalfY = window.innerHeight / 2;
+
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.composer.setSize( window.innerWidth, window.innerHeight );
+
+        };
+
+        this.update = function () {
+            requestAnimationFrame(this.update.bind(this));
+
+            this.render();
+        };
+
+        this.render = function () {
+
+            this.updateCamera();
+        };
+
+        this.updateCamera = function(){
+
+            /*this.camera.position.x += ( this.mouseX - this.camera.position.x ) * .05;
+            this.camera.position.y += ( -this.mouseY + 200 - this.camera.position.y ) * .05;
+            this.camera.lookAt(this.scene.position);*/
+
+            this.renderer.render(this.scene, this.camera);
+        };
+
+        this.init();
+
+    };
+
+
+
+    window.onload = function() {
+        const exp = new Exp();
+        let gui = new dat.GUI();
+    };
+</script>
+</body>
+</html>
